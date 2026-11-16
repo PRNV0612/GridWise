@@ -1,0 +1,31 @@
+# Data & artifacts
+data/raw/
+data/processed/
+models/
+*.joblib
+*.parquet
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+
+# Env & secrets
+.env
+.env.*
+
+# Node
+node_modules/
+.next/
+web/out/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Notebooks kept, but not their execution junk
+notebooks/*.html
