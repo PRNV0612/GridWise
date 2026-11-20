@@ -80,6 +80,15 @@ export default function Home() {
     [hours]
   );
 
+  const axis = { stroke: "#64748b", fontSize: 11, tickLine: false };
+  const tooltip = {
+    contentStyle: {
+      background: "#121821", border: "1px solid rgba(255,255,255,0.1)",
+      borderRadius: 10, fontSize: 12,
+    },
+    labelStyle: { color: "#94a3b8" },
+  };
+
   // anomaly start markers, matched to the chart x labels
   const markers = useMemo(
     () =>
@@ -111,13 +120,25 @@ export default function Home() {
 
   return (
     <main>
-      <h1>
-        <span className="brand">Grid</span>Wise
-      </h1>
-      <p className="subtitle">
-        building electricity forecast · anomaly detection · carbon-aware load
-        shifting
-      </p>
+      <header>
+        <div className="logo">
+          <div className="logo-mark">G</div>
+          <h1>
+            <span className="brand">Grid</span>Wise
+          </h1>
+        </div>
+        <p className="subtitle">
+          building electricity forecast · anomaly detection · carbon-aware load
+          shifting
+        </p>
+        {b && (
+          <div className="building-meta">
+            <span className="chip"><b>{b.primaryspaceusage}</b></span>
+            <span className="chip">{b.sqm?.toLocaleString()} m²</span>
+            <span className="chip">site {b.site_id}</span>
+          </div>
+        )}
+      </header>
 
       <div className="controls">
         <select value={selected} onChange={(e) => setSelected(e.target.value)}>
@@ -139,27 +160,26 @@ export default function Home() {
       </div>
 
       {err && <p className="error">{err}</p>}
-      {b && (
-        <p className="subtitle">
-          {b.primaryspaceusage} · {b.sqm?.toLocaleString()} m² · site {b.site_id}
-        </p>
-      )}
 
       <div className="cards">
         <div className="stat">
           <div className="label">anomaly events</div>
-          <div className="value">{events.length}</div>
+          <div className="value amber">{events.length}</div>
         </div>
         {shift && (
           <>
             <div className="stat">
-              <div className="label">kWh moved</div>
-              <div className="value blue">{shift.kwh_moved.toLocaleString()}</div>
+              <div className="label">load shifted</div>
+              <div className="value blue">
+                {shift.kwh_moved.toLocaleString()}
+                <span className="unit"> kWh</span>
+              </div>
             </div>
             <div className="stat">
-              <div className="label">CO₂ saved</div>
+              <div className="label">CO₂ avoided</div>
               <div className="value green">
-                {shift.co2_saved_kg.toLocaleString()} kg ({shift.co2_saved_pct}%)
+                {shift.co2_saved_kg.toLocaleString()}
+                <span className="unit"> kg · {shift.co2_saved_pct}%</span>
               </div>
             </div>
           </>
@@ -173,18 +193,19 @@ export default function Home() {
             <p className="empty">no data — pick a building and date range</p>
           ) : (
             <LineChart data={chartData} width={720} height={320}>
-              <CartesianGrid stroke="#2a3440" strokeDasharray="3 3" />
-              <XAxis dataKey="t" stroke="#8b98a5" fontSize={11}
-                interval="preserveStartEnd" />
-              <YAxis stroke="#8b98a5" fontSize={11} />
-              <Tooltip contentStyle={{ background: "#1a2129", border: "1px solid #2a3440" }} />
-              <Legend />
-              <Line dataKey="actual" stroke="#e6edf3" dot={false} strokeWidth={1.5} />
+              <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+              <XAxis dataKey="t" {...axis} interval="preserveStartEnd" />
+              <YAxis {...axis} width={56} />
+              <Tooltip {...tooltip} />
+              <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
+              <Line dataKey="actual" stroke="#edf2f7" dot={false} strokeWidth={1.8}
+                activeDot={{ r: 3, fill: "#edf2f7" }} />
               <Line dataKey="forecast" stroke="#34d399" dot={false}
-                strokeWidth={1.5} strokeDasharray="4 2" />
+                strokeWidth={1.8} strokeDasharray="4 3"
+                activeDot={{ r: 3, fill: "#34d399" }} />
               {markers.map((m, i) => (
-                <ReferenceDot key={i} x={m.x} y={m.y} r={5} fill="#ef4444"
-                  stroke="none" ifOverflow="extendDomain" />
+                <ReferenceDot key={i} x={m.x} y={m.y} r={5} fill="#f87171"
+                  stroke="#0a0e14" strokeWidth={2} ifOverflow="extendDomain" />
               ))}
             </LineChart>
           )}
@@ -209,9 +230,11 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="panel" style={{ marginTop: 16 }}>
-        <h2>carbon-aware shift plan (DEWA scenario, next 24 h from window start)</h2>
-        <button onClick={runShift}>optimise shift</button>
+      <div className="panel" style={{ marginTop: 18 }}>
+        <h2>carbon-aware shift plan — DEWA scenario, 24 h from window start</h2>
+        <div style={{ marginBottom: 14 }}>
+          <button onClick={runShift}>optimise shift</button>
+        </div>
         {shift && (
           <>
             <LineChart
@@ -223,22 +246,25 @@ export default function Home() {
                 ci,
               }))}
             >
-              <CartesianGrid stroke="#2a3440" strokeDasharray="3 3" />
-              <XAxis dataKey="t" stroke="#8b98a5" fontSize={11} />
-              <YAxis yAxisId="l" stroke="#8b98a5" fontSize={11} />
-              <YAxis yAxisId="r" orientation="right" stroke="#f59e0b" fontSize={11} />
-              <Tooltip contentStyle={{ background: "#1a2129", border: "1px solid #2a3440" }} />
-              <Legend />
-              <Line yAxisId="l" dataKey="baseline" stroke="#e6edf3" dot={false} strokeWidth={1.5} />
-              <Line yAxisId="l" dataKey="shifted" stroke="#34d399" dot={false} strokeWidth={1.5} />
-              <Line yAxisId="r" dataKey="ci" stroke="#f59e0b" dot={false}
-                strokeWidth={1} strokeDasharray="2 3" />
+              <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+              <XAxis dataKey="t" {...axis} />
+              <YAxis yAxisId="l" {...axis} width={56} />
+              <YAxis yAxisId="r" orientation="right" stroke="#fbbf24"
+                fontSize={11} tickLine={false} width={50} />
+              <Tooltip {...tooltip} />
+              <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
+              <Line yAxisId="l" dataKey="baseline" stroke="#94a3b8" dot={false}
+                strokeWidth={1.8} />
+              <Line yAxisId="l" dataKey="shifted" stroke="#34d399" dot={false}
+                strokeWidth={2.2} />
+              <Line yAxisId="r" dataKey="ci" stroke="#fbbf24" dot={false}
+                strokeWidth={1.2} strokeDasharray="2 3" />
             </LineChart>
             <p className="note">
-              white = baseline load, green = shifted load (bars move toward the
-              orange carbon dips), yellow dashed = carbon intensity
-              (gCO₂/kWh). Provider: {shift.provider} — UAE scenario, calibrated
-              projection, not measured data.
+              grey = baseline load, green = shifted load (moves toward the amber
+              carbon dips), amber dashed = carbon intensity (gCO₂/kWh).
+              Provider: {shift.provider} — UAE scenario, calibrated projection,
+              not measured data.
             </p>
           </>
         )}
