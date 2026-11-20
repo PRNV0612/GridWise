@@ -22,6 +22,14 @@ Held-out test year (2017, never seen in training), 131 buildings, 1.12M hourly p
 - Anomaly detection validated by synthetic fault injection (a +3σ 5-hour plateau is flagged with z-scores 4–7; a single-hour spike is correctly ignored).
 - Carbon-aware shift demo: moving 8.2% of a large office's daily load saves **5.2% of its CO₂** (581 kg/day, DEWA scenario curve) with energy exactly conserved and all per-hour caps respected — guaranteed by property tests.
 
+## Feature importance (SHAP)
+
+Exact Shapley values (TreeExplainer) on a 20k-row sample of the 2017 test set:
+
+![SHAP feature importance](docs/plots/shap_importance.png)
+
+Read: the building's **own recent load history dominates** — the trailing 24h mean and the 24h/168h lags carry most of the signal, which is exactly why the day-ahead model beats the seasonal-naive baseline (which uses only lag-168h) and why the weather-only M&V model is deliberately lag-free. Weather contributes shape (temperature response) but not level; `building_id` and size capture the cross-building scale.
+
 ## Architecture
 
 ```
@@ -64,7 +72,7 @@ git clone --depth 1 https://github.com/buds-lab/building-data-genome-project-2 d
 
 # 2. Python environment + pipeline (ETL → train → anomalies)
 uv venv .venv --python 3.11
-uv pip install --python .venv/bin/python -e ".[dev]"
+uv pip install --python .venv/bin/python -e ".[dev]" ".[shap]"
 .venv/bin/python -m gridwise.etl       # cleaned parquet, 131 covered meters
 .venv/bin/python -m gridwise.train     # LightGBM models + metrics.json
 .venv/bin/python -m gridwise.anomalies # anomaly flags
