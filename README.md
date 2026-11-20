@@ -30,6 +30,18 @@ Exact Shapley values (TreeExplainer) on a 20k-row sample of the 2017 test set:
 
 Read: the building's **own recent load history dominates** — the trailing 24h mean and the 24h/168h lags carry most of the signal, which is exactly why the day-ahead model beats the seasonal-naive baseline (which uses only lag-168h) and why the weather-only M&V model is deliberately lag-free. Weather contributes shape (temperature response) but not level; `building_id` and size capture the cross-building scale.
 
+## UAE scenario overlay (labelled projection)
+
+The same large office replayed under **ERA5 Dubai weather** with the weather-only model, scaled to 2026 with the KAPSARC DEWA growth anchor (`gridwise/uae_scenario.py`, rerunnable):
+
+![UAE scenario](docs/plots/uae_scenario.png)
+
+- **+45% annual consumption** (14.7 vs 10.2 GWh) under Dubai's cooling-dominated climate
+- **Summer/winter swing of 1.41×** vs 1.19× at home — cooling load dominates
+- **Shift value grows with it**: on a July day, the optimiser moves 4,683 kWh and saves **1,059 kg CO₂ (5.3%)** against the DEWA solar-shaped carbon curve
+
+Every number here is a **calibrated scenario projection** — no public hourly smart-meter data exists for the Gulf region, so nothing is claimed as measured. The point of the overlay is method transfer: the same forecast + shift pipeline works unchanged under a different climate and grid.
+
 ## Architecture
 
 ```
