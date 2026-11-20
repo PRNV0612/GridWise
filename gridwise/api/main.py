@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 
 import joblib
+import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
 
@@ -52,7 +53,8 @@ def _load() -> None:
     for c in ("primaryspaceusage", "building_id", "site_id"):
         feats[c] = feats[c].cat.add_categories([]).fillna("Unknown")
     day_pred = pd.Series(
-        _STATE["day_ahead"].predict(feats[DAY_AHEAD_FEATURE_COLS]),
+        # model predicts log1p(kwh); convert back to kWh (same as train.py)
+        np.expm1(_STATE["day_ahead"].predict(feats[DAY_AHEAD_FEATURE_COLS])),
         index=feats.index,
     )
     _STATE["forecast"] = pd.Series(

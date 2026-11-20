@@ -32,6 +32,12 @@ def test_forecast_roundtrip(client):
     assert r.status_code == 200
     assert j["n_hours"] > 20
     assert all("forecast_kwh" in h for h in j["hours"])
+    # regression: forecasts must be in kWh, not log1p(kwh)
+    big = [h for h in j["hours"] if h["kwh"] and h["kwh"] > 100]
+    if big:
+        assert any(h["forecast_kwh"] > 1.0 for h in big), (
+            "forecast looks like log-space values — expm1 conversion missing"
+        )
 
 
 def test_forecast_unknown_building_404(client):

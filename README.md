@@ -79,6 +79,16 @@ cd web && npm install && npm run dev       # http://localhost:3000
 
 Interactive API docs: `http://localhost:8000/docs`.
 
+## Screenshots
+
+**Forecast & anomalies** — actual (white) vs forecast (green) hourly load, red dots marking anomaly event starts, anomaly list at right:
+
+![forecast vs actual with anomalies](docs/screenshots/dashboard_forecast.png)
+
+**Carbon-aware shift plan** — the optimiser moves flexible load toward the amber carbon-intensity dips; savings cards show kWh moved and CO₂ avoided:
+
+![carbon-aware shift plan](docs/screenshots/dashboard_shift.png)
+
 ## Honesty caveats (read before quoting numbers)
 
 1. **The meter data is 2016–17, not 2026.** BDG2 is the benchmark every serious paper in this space uses; the load model is trained and scored on it, and that is stated plainly. Current-year relevance is carried by the **live** UK carbon signal and the UAE scenario — never by claiming the load data is current.
