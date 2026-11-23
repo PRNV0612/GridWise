@@ -1,0 +1,9 @@
+.git
+.venv
+web
+data
+models
+notebooks
+docs
+tests
+*.png

@@ -99,6 +99,16 @@ cd web && npm install && npm run dev       # http://localhost:3000
 
 Interactive API docs: `http://localhost:8000/docs`.
 
+### Docker Compose (one command)
+
+After the pipeline has produced `models/` and `data/processed/` (steps 1–2 above), the whole stack runs containerised:
+
+```bash
+docker compose up --build   # API on :8000, dashboard on :3000
+```
+
+The API container mounts `models/` and `data/processed/` as volumes (the ~2 GB of data and model artifacts stay out of the image), and the dashboard waits on the API's healthcheck before starting. Note: API startup loads the parquet and both models, so give the container ~30 s and at least ~4 GB of Docker memory.
+
 ## Screenshots
 
 **Forecast & anomalies** — actual (white) vs forecast (green) hourly load, red dots marking anomaly event starts, anomaly list at right:
